@@ -180,7 +180,9 @@ const overrides = new Map([
   // Windows Doctor install fix: cli_install_commands_windows field added to test stubs.
   // team-instructions-first-class: ManagedAgentRecord fixture gains the new
   // team_id field (+1 line).
-  ["src-tauri/src/managed_agents/readiness.rs", 1863],
+  // +1 (1863 -> 1864): the same fixture gains the new mandatory
+  // `resume_on_restart` field.
+  ["src-tauri/src/managed_agents/readiness.rs", 1864],
   // Windows PATH-correctness fix: 3 #[cfg(windows)] test functions covering
   // .cmd shim rejection, .bat shim rejection, and .exe acceptance for
   // configure_runtime_cli (fix #2397). Test-only growth; queued to split.
@@ -198,7 +200,10 @@ const overrides = new Map([
   // Queued to shrink with the next runtime split pass (#2974 follow-up).
   // +1: #3023 credential-helper slash normalization (MinGW bash treats
   // backslashes as escapes).
-  ["src-tauri/src/managed_agents/runtime.rs", 1033],
+  // +8 (1033 -> 1041): resume-on-restart toggle — the conditional
+  // BUZZ_ACP_RESUME_ON_RESTART spawn write (with its precedence comment) and
+  // the summary projection. Load-bearing feature growth.
+  ["src-tauri/src/managed_agents/runtime.rs", 1041],
   // applyWorkspace reposDir parameter plus the validateReposDir binding,
   // threaded through Tauri invokes for configurable repos_dir, plus the
   // harness-persona-sync `harnessOverride` create-input bit — load-bearing
@@ -403,7 +408,9 @@ const overrides = new Map([
   // regressions for the fail-closed parse.
   // +2 (1922 -> 1924): the AgentDefinition and ManagedAgentRecord fixtures each
   // set the new mandatory `catalog_source` field.
-  ["src-tauri/src/managed_agents/discovery/tests.rs", 1924],
+  // +1 (1924 -> 1925): the ManagedAgentRecord fixture sets the new mandatory
+  // `resume_on_restart` field.
+  ["src-tauri/src/managed_agents/discovery/tests.rs", 1925],
   // identity-import-keyring: the identity resolution state machine's behavioral
   // matrix (46 tests over FakeIdentityStore — probe × marker × file cells,
   // adoption / read-back-corruption / marker-failure arms, recovery-mode
@@ -600,7 +607,9 @@ const overrides = new Map([
   // persona-model re-tag branch replaced; two new regression tests added.
   // +2 (1110 -> 1112): the agent_record and persona_with_model test fixtures
   // each set the new mandatory `catalog_source` field.
-  ["src-tauri/src/commands/agent_config.rs", 1112],
+  // +1 (1112 -> 1113): the agent_record fixture sets the new mandatory
+  // `resume_on_restart` field.
+  ["src-tauri/src/commands/agent_config.rs", 1113],
   // codex-install-auto-restart review-fixes: should_restart_after_install
   // takes pid_alive:bool (pure predicate, no OS-dependent call); 3 racy
   // cache tests replaced with 6 pure availability_drift predicate tests;
@@ -700,7 +709,10 @@ const overrides = new Map([
   // +28 (1201 -> 1229): inline "Add custom harness…" entry — sentinel option,
   // modal state, and the AddCustomHarnessDialog mount. The shared routing and
   // deferred-selection logic lives in addCustomHarness.ts to keep this minimal.
-  ["src/features/agents/ui/AgentInstanceEditDialog.tsx", 1229],
+  // +12 (1229 -> 1241): resume-on-restart toggle — state, open-effect reset,
+  // the changed-only setter call at submit, and the prop pass into
+  // EditAgentAdvancedFields (the switch markup lives there).
+  ["src/features/agents/ui/AgentInstanceEditDialog.tsx", 1241],
   // AgentDefinitionDialog grew past 1000 with the following load-bearing fixes:
   // isRuntimeAutoSeededRef tracking for edit-mode seeding (Fizz shows models);
   // runtimeSupportsLlmProviderSelection guard on discovery provider (codex fix);
@@ -713,6 +725,16 @@ const overrides = new Map([
   // (rAF retry loop) took this file 999 -> 1026 and landed without this entry,
   // so main's Desktop Core went red. Queued to split with the rest of this list.
   ["src/features/agents/ui/AgentCreationPreview.tsx", 1026],
+  // resume-on-restart toggle: `resume_on_restart` is a mandatory
+  // ManagedAgentRecord field, so every struct-literal fixture gains one line.
+  // These three files sat exactly at the 1000 default, so a one-line fixture
+  // sweep crosses it. Narrow ratchets at the exact delta; queued to split.
+  ["src-tauri/src/commands/personas/snapshot/tests.rs", 1001],
+  ["src-tauri/src/managed_agents/agent_snapshot.rs", 1001],
+  // types.rs additionally carries the field itself (doc + serde default),
+  // its `default_resume_on_restart` fn, the ManagedAgentSummary projection,
+  // and the AgentDefinition::into_agent_record seed: +10 (995 -> 1005).
+  ["src-tauri/src/managed_agents/types.rs", 1005],
 ]);
 
 await runFileSizeCheck({
