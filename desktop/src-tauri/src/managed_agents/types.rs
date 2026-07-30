@@ -464,10 +464,9 @@ pub struct ManagedAgentProcess {
     pub log_path: PathBuf,
     /// The effective spawn config this process was launched with (see
     /// `spawn_snapshot::SpawnConfigSnapshot`). Runtime-only — never persisted.
-    /// The summary builder recomputes a prospective snapshot from current disk
-    /// state and reports each differing field via
-    /// `ManagedAgentSummary::restart_diff`. Agents adopted via a persisted
-    /// `runtime_pid` have none, so their config is unknown and no badge fires.
+    /// The summary builder recomputes a prospective snapshot and reports
+    /// differing fields via `ManagedAgentSummary::restart_diff`. Agents
+    /// adopted via `runtime_pid` have none; their config is unknown.
     pub spawn_config: super::spawn_snapshot::SpawnConfigSnapshot,
     /// Whether this process was spawned in setup-listener mode (i.e.
     /// `BUZZ_ACP_SETUP_PAYLOAD` was set at launch because the agent was
@@ -541,16 +540,12 @@ pub struct ManagedAgentSummary {
     /// `OrphanedInstance` arm via `require_resolved`) — so the UI
     /// should surface that it's stuck, not merely stale.
     pub persona_orphaned: bool,
-    /// `true` when the running process was spawned with a config that no
-    /// longer matches what a spawn would use today — a plain restart would
-    /// change what runs. Complements `persona_out_of_date`: this means "a
-    /// restart would change what runs"; out-of-date means "a respawn would."
-    /// Derived from `restart_diff` alone, so it is lit exactly when there is
-    /// something to show — never for a stopped agent, an orphan, or a
-    /// `runtime_pid`-adopted process (its spawn config is unknown).
+    /// `true` when the running process's spawn config no longer matches
+    /// what a spawn would use today. Derived from `restart_diff` — lit
+    /// exactly when there is something to show. Always `false` for stopped,
+    /// orphaned, or `runtime_pid`-adopted agents.
     pub needs_restart: bool,
-    /// Each field whose effective spawn value drifted since launch, redacted
-    /// for display (see `spawn_snapshot::diff`).
+    /// Fields that drifted since launch, redacted for display.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub restart_diff: Vec<super::spawn_snapshot::RestartDiffEntry>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
