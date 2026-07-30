@@ -159,7 +159,10 @@ export function ManagedAgentRow({
             so no nested interactive elements are introduced here. */}
         <div className="flex shrink-0 items-start gap-2 lg:pt-0.5">
           {agent.needsRestart ? (
-            <RestartDiffBadge restartDiff={agent.restartDiff} />
+            <RestartDiffBadge
+              autoRestartEnabled={agent.autoRestartOnConfigChange}
+              restartDiff={agent.restartDiff}
+            />
           ) : null}
           <Button
             onClick={() => onOpenProfile(agent.pubkey)}

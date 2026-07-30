@@ -395,7 +395,8 @@ export function ProfileSummaryView({
           before this change). */}
       {managedAgent?.needsRestart ? (
         <RestartDiffBadge
-          className="self-start"
+          autoRestartEnabled={managedAgent.autoRestartOnConfigChange}
+          className="self-center"
           restartDiff={managedAgent.restartDiff}
         />
       ) : null}

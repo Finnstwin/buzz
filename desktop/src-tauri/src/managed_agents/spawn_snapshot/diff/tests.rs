@@ -190,6 +190,76 @@ fn array_field_changes_as_one_atomic_leaf() {
     ));
 }
 
+#[test]
+fn allowlisted_env_key_shows_plain_value() {
+    // BUZZ_AGENT_THINKING_EFFORT is on the safe-to-reveal allowlist — the user
+    // must be able to see actual enum values like "medium → high".
+    let mut before = base();
+    before
+        .env
+        .insert("BUZZ_AGENT_THINKING_EFFORT".into(), "medium".into());
+    let mut after = before.clone();
+    after
+        .env
+        .insert("BUZZ_AGENT_THINKING_EFFORT".into(), "high".into());
+    assert_eq!(
+        change_at(&diff(&before, &after), "env.BUZZ_AGENT_THINKING_EFFORT"),
+        &RestartChange::Value {
+            before: Value::String("medium".into()),
+            after: Value::String("high".into()),
+        },
+        "allowlisted env key must render plain before/after values"
+    );
+}
+
+#[test]
+fn allowlisted_env_key_is_case_insensitive() {
+    // The allowlist comparison is case-insensitive; lowercase path must also
+    // render plain.
+    let mut before = base();
+    before
+        .env
+        .insert("buzz_agent_provider".into(), "anthropic".into());
+    let mut after = before.clone();
+    after
+        .env
+        .insert("buzz_agent_provider".into(), "openai".into());
+    assert_eq!(
+        change_at(&diff(&before, &after), "env.buzz_agent_provider"),
+        &RestartChange::Value {
+            before: Value::String("anthropic".into()),
+            after: Value::String("openai".into()),
+        },
+        "allowlist match must be case-insensitive"
+    );
+}
+
+#[test]
+fn non_allowlisted_env_key_stays_masked() {
+    // A key not in the allowlist must remain masked regardless of its name.
+    let mut after = base();
+    after
+        .env
+        .insert("SOME_API_KEY".into(), "sk-live-rotated-9999".into());
+    // SOME_API_KEY is a new key — starts as Added, not a value change.
+    // Use an existing env key (OPENAI_API_KEY is in base()) to test masking.
+    let mut before = base();
+    before
+        .env
+        .insert("OPENAI_API_KEY".into(), "sk-live-SENTINEL-0000".into());
+    let mut after2 = before.clone();
+    after2
+        .env
+        .insert("OPENAI_API_KEY".into(), "sk-live-rotated-9999".into());
+    assert!(
+        matches!(
+            change_at(&diff(&before, &after2), "env.OPENAI_API_KEY"),
+            RestartChange::Masked { .. }
+        ),
+        "non-allowlisted env key must stay masked"
+    );
+}
+
 // ── masking policy ───────────────────────────────────────────────────────
 
 #[test]

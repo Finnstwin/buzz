@@ -87,8 +87,17 @@ fn policy_for(path: &str) -> MaskPolicy {
         // NIP-OA auth tag: a credential, but a suffix tells the user which tag
         // they are looking at.
         "auth_tag" => MaskPolicy::MaskedSuffix,
-        // User/persona env values routinely carry API keys.
-        _ if path.starts_with("env.") => MaskPolicy::MaskedSuffix,
+        // Env values: consult the shared allowlist. Allowlisted keys (e.g.
+        // `BUZZ_AGENT_THINKING_EFFORT`) render plain so the user sees the
+        // actual enum values; every other env key stays masked.
+        _ if path.starts_with("env.") => {
+            let key = &path[4..];
+            if crate::managed_agents::is_safe_to_reveal(key) {
+                MaskPolicy::Plain
+            } else {
+                MaskPolicy::MaskedSuffix
+            }
+        }
         // Plain arm. Every path reaching it is already rendered verbatim in
         // the runtime UI today:
         //   acp_command / command / mcp_command — resolved binary names

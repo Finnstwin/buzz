@@ -5,6 +5,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import type { RestartDiffEntry, RestartChange } from "@/shared/api/types";
 import { cn } from "@/shared/lib/cn";
 
+// ── Auto-restart copy ─────────────────────────────────────────────────────────
+
+/**
+ * Shared blurb strings for the auto-restart state. Exported so the Runtime-tab
+ * banner can import the same constants — the two surfaces must never drift.
+ */
+export const AUTO_RESTART_ON_BLURB =
+  "Configuration changed since this agent started. Buzz can restart it automatically after ~3 minutes idle, or stop and respawn it to apply now.";
+
+export const AUTO_RESTART_OFF_BLURB =
+  "Configuration changed since this agent started. Automatic restart is off for this agent — stop and respawn it to apply the changes.";
+
 // ── Label helpers ─────────────────────────────────────────────────────────────
 
 /**
@@ -125,14 +137,16 @@ function DiffList({
 /**
  * The restart-required badge. When `restartDiff` is non-empty, shows a hover
  * tooltip with the itemised before→after diff (capped at {@link TOOLTIP_CAP}
- * entries). Renders as a non-interactive `<span>` so it can safely be placed
- * adjacent to (not inside) a `<button>` — it must never be a descendant of an
- * interactive element.
+ * entries) plus the auto-restart blurb. Renders as a non-interactive `<span>`
+ * so it can safely be placed adjacent to (not inside) a `<button>` — it must
+ * never be a descendant of an interactive element.
  */
 export function RestartDiffBadge({
+  autoRestartEnabled = false,
   restartDiff,
   className,
 }: {
+  autoRestartEnabled?: boolean;
   restartDiff: RestartDiffEntry[];
   className?: string;
 }) {
@@ -166,6 +180,9 @@ export function RestartDiffBadge({
       <TooltipContent className="max-w-72 text-xs" side="bottom">
         <p className="mb-1.5 font-semibold">Config changed since last start:</p>
         <DiffList cap={TOOLTIP_CAP} entries={restartDiff} />
+        <p className="mt-1.5 text-primary-foreground/70">
+          {autoRestartEnabled ? AUTO_RESTART_ON_BLURB : AUTO_RESTART_OFF_BLURB}
+        </p>
       </TooltipContent>
     </Tooltip>
   );

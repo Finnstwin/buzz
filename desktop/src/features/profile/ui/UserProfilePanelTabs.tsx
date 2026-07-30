@@ -10,7 +10,11 @@ import {
 } from "lucide-react";
 
 import type { ManagedAgent, RestartDiffEntry } from "@/shared/api/types";
-import { RestartDiffList } from "@/features/agents/ui/RestartDiffBadge";
+import {
+  AUTO_RESTART_OFF_BLURB,
+  AUTO_RESTART_ON_BLURB,
+  RestartDiffList,
+} from "@/features/agents/ui/RestartDiffBadge";
 import type { ActiveTurnSummary } from "@/features/agents/activeAgentTurnsStore";
 import { ManagedAgentSessionPanel } from "@/features/agents/ui/ManagedAgentSessionPanel";
 import {
@@ -868,8 +872,8 @@ export function ProfileRuntimeTabContent({
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {autoRestartEnabled
-                ? "Configuration changed since this agent started. Buzz can restart it automatically after ~3 minutes idle, or stop and respawn it to apply now."
-                : "Configuration changed since this agent started. Automatic restart is off for this agent \u2014 stop and respawn it to apply the changes."}
+                ? AUTO_RESTART_ON_BLURB
+                : AUTO_RESTART_OFF_BLURB}
             </p>
             {/* Full uncapped diff list — Runtime banner is the only surface
                 where all entries show without truncation. */}

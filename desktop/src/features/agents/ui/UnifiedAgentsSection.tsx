@@ -340,7 +340,10 @@ function AgentPersonaCard({
             Configuration missing
           </Badge>
         ) : agent?.needsRestart ? (
-          <RestartDiffBadge restartDiff={agent.restartDiff} />
+          <RestartDiffBadge
+            autoRestartEnabled={agent.autoRestartOnConfigChange}
+            restartDiff={agent.restartDiff}
+          />
         ) : null
       }
     />
@@ -412,7 +415,10 @@ function StandaloneAgentCard({
             Configuration missing
           </Badge>
         ) : agent.needsRestart ? (
-          <RestartDiffBadge restartDiff={agent.restartDiff} />
+          <RestartDiffBadge
+            autoRestartEnabled={agent.autoRestartOnConfigChange}
+            restartDiff={agent.restartDiff}
+          />
         ) : null
       }
     />
