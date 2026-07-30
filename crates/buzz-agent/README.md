@@ -163,24 +163,20 @@ Everything is environment variables. No flags, no config files. (We are a subpro
 | `BUZZ_AGENT_MAX_LINE_BYTES` | `4194304` | 4 MiB. Hard cap on inbound JSON-RPC frames. |
 | `BUZZ_AGENT_MAX_HISTORY_BYTES` | `1048576` | 1 MiB. Old turns are evicted past this. |
 | `BUZZ_AGENT_MAX_TOOL_RESULT_TEXT_BYTES` | `51200` | 50 KiB. Per-result cap on tool-output text; oversize is middle-elided (head + tail kept) with an inline marker. Images are exempt. |
-| `BUZZ_AGENT_REQUIRE_REPLY` | `0` (`1` on mesh) | `1` enables the [reply guard](#reply-guard) — remind the model to publish when a turn is about to end with nothing posted to Buzz. Desktop defaults it to `1` for Buzz shared-compute agents. |
+| `BUZZ_AGENT_REQUIRE_REPLY` | `0` | Explicit opt-in only. A nonzero value enables the [reply guard](#reply-guard) — remind the model to publish when a turn is about to end with nothing posted to Buzz. Buzz never sets this automatically. |
 
 
 ## Reply Guard
 
-Off by default, except on Buzz shared-compute (mesh) agents, where Buzz Desktop
-sets `BUZZ_AGENT_REQUIRE_REPLY=1` automatically. With it enabled, a turn that is
-about to end without any recognized attempt to post to Buzz gets a reminder that
-its assistant text is invisible to humans, and is rerolled.
+Off by default everywhere, including mesh agents. Buzz never injects this setting:
+an operator must explicitly set `BUZZ_AGENT_REQUIRE_REPLY` to a nonzero value.
+With it enabled, a turn that is about to end without any recognized attempt to
+post to Buzz gets a reminder that its assistant text is invisible to humans,
+and is rerolled.
 
 This exists because a Buzz agent's reasoning and tool output are not shown to
 anyone. A turn that does real work and never posts is a silent failure — the
 requester waits on a result that was produced and thrown away.
-
-Mesh agents get it by default because they run on small local models, which are
-the ones most likely to do the work and then end the turn without publishing it.
-Setting `BUZZ_AGENT_REQUIRE_REPLY=0` on the agent, persona, or global env opts a
-mesh agent back out; the default never overrides an explicit value.
 
 **Advisory, never a trap.** At most two reminders, then the turn ends whether or
 not anything was published. The guard catches accidental omission; it does not
